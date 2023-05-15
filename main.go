@@ -82,21 +82,21 @@ func skulookup() {
 					// For a single SKU
 					log.Debugf("Days since checkout for SKU %s: %d", skuList[0], daysSinceCheckout)
 					if daysSinceCheckout == 6 {
-						message = fmt.Sprintf("Automated message from BBB Sorting. Please contact your manager if you have further questions. Just a friendly reminder that the following SKU is due back tomorrow: %s", skuList[0])
+						message = fmt.Sprintf("Just a friendly reminder that the following SKU is due back tomorrow: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", skuList[0])
 					} else if daysSinceCheckout >= 9 {
-						message = fmt.Sprintf("Automated message from BBB Sorting. Please contact your manager if you have further questions. Just a friendly reminder that the following SKU is now overdue. Please return this SKU ASAP: %s", skuList[0])
+						message = fmt.Sprintf("Just a friendly reminder that the following SKU is now overdue. Please return this SKU ASAP: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", skuList[0])
 					} else {
-						message = fmt.Sprintf("Automated message from BBB Sorting. Please contact your manager if you have further questions. Just a friendly reminder that the following SKU is due back soon: %s", skuList[0])
+						message = fmt.Sprintf("Just a friendly reminder that the following SKU is due back soon: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", skuList[0])
 					}
 				} else {
 					// For multiple SKUs
 					log.Debugf("Days since checkout for SKUs %s: %d", strings.Join(skuList, ", "), daysSinceCheckout)
 					if daysSinceCheckout == 6 {
-						message = fmt.Sprintf("Automated message from BBB Sorting. Please contact your manager if you have further questions. Just a friendly reminder that the following SKUs are due back tomorrow: %s", strings.Join(skuList, ", "))
+						message = fmt.Sprintf("Just a friendly reminder that the following SKUs are due back tomorrow: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", strings.Join(skuList, ", "))
 					} else if daysSinceCheckout >= 9 {
-						message = fmt.Sprintf("Automated message from BBB Sorting. Please contact your manager if you have further questions. Just a friendly reminder that the following SKUs are now overdue. Please return these SKUs ASAP: %s", strings.Join(skuList, ", "))
+						message = fmt.Sprintf("Just a friendly reminder that the following SKUs are now overdue. Please return these SKUs ASAP: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", strings.Join(skuList, ", "))
 					} else {
-						message = fmt.Sprintf("Automated message from BBB Sorting. Please contact your manager if you have further questions. Just a friendly reminder that the following SKUs are due back soon: %s", strings.Join(skuList, ", "))
+						message = fmt.Sprintf("Just a friendly reminder that the following SKUs are due back soon: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", strings.Join(skuList, ", "))
 					}
 				}
 				// Print the message for debugging purposes (replace with code to send the message to the user)
