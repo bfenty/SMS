@@ -104,8 +104,10 @@ func skulookup() {
 				// Print the message for debugging purposes (replace with code to send the message to the user)
 				fmt.Printf("Sending message to user %s:\n%s\n Phone: %s", user, message, phone)
 				// send message to user
-				sendsms(message, phone)
-				sendsms(user+"-"+message, "9314349554")
+				if message != "" {
+					sendsms(message, phone)
+					sendsms(user+"-"+message, "9314349554")
+				}
 			}
 		}
 	}
