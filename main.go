@@ -24,7 +24,7 @@ func main() {
 
 func skulookup() {
 	// Prepare the query
-	query := `SELECT b.phone, a.sku, a.sorter, DATEDIFF(NOW(), a.checkout) as days_since_checkout FROM purchasing.sortrequest a left join orders.users b on a.sorter = b.username WHERE checkout <= DATE_SUB(NOW(), INTERVAL 6 DAY) AND checkint IS NULL`
+	query := `SELECT b.phone, a.sku, a.sorter, DATEDIFF(NOW(), a.checkout) as days_since_checkout FROM purchasing.sortrequest a left join orders.users b on a.sorter = b.username WHERE checkout <= DATE_SUB(NOW(), INTERVAL 6 DAY) AND checkint IS NULL and b.phone is not null`
 
 	// Debug log the query being executed
 	log.Printf("Executing query: %s", query)
