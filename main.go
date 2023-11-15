@@ -7,9 +7,8 @@ import (
 
 	"os"
 
-	"github.com/sfreiberg/gotwilio"
-
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/sfreiberg/gotwilio"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,6 +16,8 @@ import (
 var db *sql.DB
 
 func main() {
+	//Set the logging level
+	log.SetLevel(log.DebugLevel)
 	//Open the Database
 	db = opendb()
 	skulookup()
@@ -24,14 +25,14 @@ func main() {
 
 func skulookup() {
 	// Prepare the query
-	query := `SELECT b.phone, a.sku, a.sorter, DATEDIFF(NOW(), a.checkout) as days_since_checkout FROM purchasing.sortrequest a left join orders.users b on a.sorter = b.username WHERE checkout <= DATE_SUB(NOW(), INTERVAL 6 DAY) AND checkint IS NULL and b.phone is not null`
+	query := `SELECT b.phone, a.sku, a.sorter, DATEDIFF(NOW(), a.checkout) as days_since_checkout FROM purchasing.sortrequest a left join orders.users b on a.sorter = b.username WHERE status = 'Checkout' AND DATEDIFF(NOW(), a.checkout) > 0 and b.phone is not null`
 
 	// Debug log the query being executed
 	log.Printf("Executing query: %s", query)
 
 	rows, err := db.Query(query)
 	if err != nil {
-		log.Fatalf("Error executing query: %v", err)
+		log.Errorf("Error executing query: %v", err)
 	}
 	defer rows.Close()
 
@@ -42,20 +43,23 @@ func skulookup() {
 	users := make(map[string]map[string]int)
 	for rows.Next() {
 		err := rows.Scan(&phone, &sku, &sorter, &daysSinceCheckout)
+
+		// Optional: Debug log for each processed row
+		log.Debugf("Processed: Sorter: %s, SKU: %s, DaysSinceCheckout: %d", sorter, sku, daysSinceCheckout)
+
 		if err != nil {
-			log.Fatalf("Error scanning row: %v", err)
+			log.Errorf("Error scanning row: %v", err)
 		}
 		if _, ok := users[sorter]; !ok {
 			users[sorter] = make(map[string]int)
 		}
 		if daysSinceCheckout == 6 {
 			users[sorter][fmt.Sprintf("%s", sku)] = daysSinceCheckout
-		} else if daysSinceCheckout >= 9 {
+		} else if daysSinceCheckout >= 8 {
 			users[sorter][fmt.Sprintf("%s", sku)] = daysSinceCheckout
 		} else if daysSinceCheckout >= 6 {
 			users[sorter][fmt.Sprintf("%s", sku)] = daysSinceCheckout
 		}
-		log.Debug(users)
 	}
 	if err := rows.Err(); err != nil {
 		log.Fatalf("Error iterating over rows: %v", err)
@@ -122,14 +126,16 @@ func sendsms(message string, toNumber string) {
 
 	// Create a new Twilio client with your credentials
 	twilio := gotwilio.NewTwilioClient(accountSid, authToken)
+	log.Debug("accoountsid:", accountSid, " auth:", authToken)
 
 	// Send the SMS message
 	_, exc, err := twilio.SendSMS(fromNumber, toNumber, message, "", "")
+	log.Debug("FROM:", fromNumber, " TO:", toNumber, " MESSAGE:", message)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	//Error Handling
+	// Error Handling
 	if exc != nil {
 		log.Fatal(exc.Message)
 	}
