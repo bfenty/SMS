@@ -8,7 +8,7 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
-	// "github.com/sfreiberg/gotwilio"
+	"github.com/sfreiberg/gotwilio"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -200,12 +200,12 @@ func sendsms(message string, toNumber string) {
 	_, exc, err := twilio.SendSMS(fromNumber, toNumber, message, "", "")
 	log.Debug("FROM:", fromNumber, " TO:", toNumber, " MESSAGE:", message)
 	if err != nil {
-		log.Errorf(err)
+		log.Error(err)
 	}
 
 	// Error Handling
 	if exc != nil {
-		log.Errof(exc.Message)
+		log.Errorf(exc.Message)
 	}
 
 	log.Info("SMS sent successfully!")
