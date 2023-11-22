@@ -34,6 +34,7 @@ func main() {
 	overdue=8
 	//Open the Database
 	db = opendb()
+	//Search the Database for overdue SKUs
 	skulookup()
 }
 
@@ -44,12 +45,14 @@ func skulookup() {
 	// Debug log the query being executed
 	log.Debugf("Executing query: %s", query)
 
+	//Run the DB Query
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Errorf("Error executing query: %v", err)
 	}
 	defer rows.Close()
 
+	//Initialize variables
 	var sku, sorter, phone string
 	var daysSinceCheckout int
 
@@ -63,15 +66,15 @@ func skulookup() {
 			continue  // Continue to the next row on error
 		}
 
-		// Optional: Debug log for each processed row
+		//Debug log for each processed row
 		log.Debugf("Processed: Sorter: %s, Phone: %s, SKU: %s, DaysSinceCheckout: %d", sorter, phone, sku, daysSinceCheckout)
 
-		key := SorterPhoneKey{Sorter: sorter, Phone: phone}
+		key := SorterPhoneKey{Sorter: sorter, Phone: phone} //Key is a combination of sorter and phone number
 		if _, ok := users[key]; !ok {
 			users[key] = make(map[string]int)
 		}
-		if daysSinceCheckout >= warning { // Adjust this condition based on your logic
-			users[key][sku] = daysSinceCheckout
+		if daysSinceCheckout >= warning {
+			users[key][sku] = daysSinceCheckout //if it's been longer than the warning period, add to the map
 		}
 	}
 	if err := rows.Err(); err != nil {
@@ -98,12 +101,12 @@ func skulookup() {
 				// Generate the message based on the number of SKUs and the days since checkout
 				log.Debugf("Generating message for %s",key.Sorter)
 				message = generateMessage(skuList, daysSinceCheckout)
-				// Print the message for debugging purposes (replace with code to send the message to the user)
+				// Print the message for logging purposes
 				log.Info("Sending message to Sorter: %s, Phone: %s:\n%s\n", key.Sorter, key.Phone, message)
 				// Send message to user
 				if message != "" {
-					sendsms(message, key.Phone)
-					sendsms(key.Sorter+"-"+message, "9314349554")  // Adjust as needed
+					sendsms(message, key.Phone) //Send to User
+					sendsms(key.Sorter+"-"+message, "9314349554")  // Send to Manager
 				}
 			}
 		}
@@ -162,16 +165,9 @@ func sendsms(message string, toNumber string) {
 
 func opendb() (db *sql.DB) {
 	var err error
-	user := os.Getenv("USER")
-	pass := os.Getenv("PASS")
-	server := os.Getenv("SERVER")
-	port := os.Getenv("PORT")
+	
 	// Get a database handle.
 	log.Info("Connecting to DB...")
-	log.Debug("user:", user)
-	log.Debug("pass:", pass)
-	log.Debug("server:", server)
-	log.Debug("port:", port)
 	log.Debug("Opening Database...")
 	connectstring := os.Getenv("USER") + ":" + os.Getenv("PASS") + "@tcp(" + os.Getenv("SERVER") + ":" + os.Getenv("PORT") + ")/purchasing?parseTime=true"
 	log.Debug("Connection: ", connectstring)
