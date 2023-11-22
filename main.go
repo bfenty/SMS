@@ -27,7 +27,8 @@ type SorterPhoneKey struct {
 
 func main() {
 	//Set the logging level
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
+	log.SetOutput(os.Stdout)
 	//Set the days
 	warning=6
 	overdue=8
@@ -41,7 +42,7 @@ func skulookup() {
 	query := `SELECT b.phone, a.sku, a.sorter, DATEDIFF(NOW(), a.checkout) as days_since_checkout FROM purchasing.sortrequest a left join orders.users b on a.sorter = b.username WHERE status = 'Checkout' AND DATEDIFF(NOW(), a.checkout) > 0 and b.phone is not null`
 
 	// Debug log the query being executed
-	log.Printf("Executing query: %s", query)
+	log.Debugf("Executing query: %s", query)
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -98,7 +99,7 @@ func skulookup() {
 				log.Debugf("Generating message for %s",key.Sorter)
 				message = generateMessage(skuList, daysSinceCheckout)
 				// Print the message for debugging purposes (replace with code to send the message to the user)
-				fmt.Printf("Sending message to Sorter: %s, Phone: %s:\n%s\n", key.Sorter, key.Phone, message)
+				log.Info("Sending message to Sorter: %s, Phone: %s:\n%s\n", key.Sorter, key.Phone, message)
 				// Send message to user
 				if message != "" {
 					sendsms(message, key.Phone)
@@ -107,58 +108,6 @@ func skulookup() {
 			}
 		}
 	}
-
-
-	// // Generate messages for each user
-	// for user, skus := range users {
-	// 	// Check if the user has any SKUs that meet the criteria
-	// 	if len(skus) > 0 {
-	// 		var message string
-	// 		var skuList []string
-	// 		var daysSinceCheckout int
-	// 		// Loop over the SKUs for the user
-	// 		for sku, days := range skus {
-	// 			// Update the days since checkout to the latest value
-	// 			daysSinceCheckout = days
-	// 			// Add the SKU to the list
-	// 			skuList = append(skuList, sku)
-	// 		}
-	// 		// Check if there are any SKUs for the user
-	// 		if len(skuList) > 0 {
-	// 			// Generate the message based on the number of SKUs and the days since checkout
-	// 			if len(skuList) == 1 {
-	// 				// For a single SKU
-	// 				log.Debugf("Days since checkout for SKU %s: %d", skuList[0], daysSinceCheckout)
-	// 				if daysSinceCheckout == 6 {
-	// 					message = fmt.Sprintf("Just a friendly reminder that the following SKU is due back tomorrow: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", skuList[0])
-	// 				} else if daysSinceCheckout >= 9 {
-	// 					message = fmt.Sprintf("Just a friendly reminder that the following SKU is now overdue. Please return this SKU ASAP: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", skuList[0])
-	// 				}
-	// 				// else {
-	// 				// 	message = fmt.Sprintf("Just a friendly reminder that the following SKU is due back soon: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", skuList[0])
-	// 				// }
-	// 			} else {
-	// 				// For multiple SKUs
-	// 				log.Debugf("Days since checkout for SKUs %s: %d", strings.Join(skuList, ", "), daysSinceCheckout)
-	// 				if daysSinceCheckout == 6 {
-	// 					message = fmt.Sprintf("Just a friendly reminder that the following SKUs are due back tomorrow: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", strings.Join(skuList, ", "))
-	// 				} else if daysSinceCheckout >= 9 {
-	// 					message = fmt.Sprintf("Just a friendly reminder that the following SKUs are now overdue. Please return these SKUs ASAP: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", strings.Join(skuList, ", "))
-	// 				}
-	// 				// else {
-	// 				// 	message = fmt.Sprintf("Just a friendly reminder that the following SKUs are due back soon: %s Automated message from BBB Sorting. Please contact your manager if you have further questions.", strings.Join(skuList, ", "))
-	// 				// }
-	// 			}
-	// 			// Print the message for debugging purposes (replace with code to send the message to the user)
-	// 			fmt.Printf("Sending message to user %s:\n%s\n Phone: %s", user, message, phone)
-	// 			// send message to user
-	// 			if message != "" {
-	// 				sendsms(message, phone)
-	// 				sendsms(user+"-"+message, "9314349554")
-	// 			}
-	// 		}
-	// 	}
-	// }
 }
 
 func generateMessage(skuList []string, daysSinceCheckout int) string {
