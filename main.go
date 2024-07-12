@@ -107,8 +107,8 @@ func skulookup() {
 					"phone":   key.Phone,
 					"message": message,
 				}).Info("Sending message")
-				// sendsms(message, key.Phone)                           //Send to User
-				// sendsms(key.Sorter+"-"+message, os.Getenv("MANAGER")) // Send to Manager
+				sendsms(message, key.Phone)                           //Send to User
+				sendsms(key.Sorter+"-"+message, os.Getenv("MANAGER")) // Send to Manager
 			}
 		}
 	}
